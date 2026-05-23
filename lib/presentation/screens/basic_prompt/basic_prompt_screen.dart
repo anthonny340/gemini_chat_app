@@ -14,13 +14,6 @@ class BasicPromptScreen extends StatelessWidget {
       lastName: "Sacheri",
       imageUrl: "https://cdn-icons-png.flaticon.com/512/12225/12225881.png",
     );
-    const geminiUser = types.User(
-      id: "gemini-id",
-      firstName: "Gemini",
-      lastName: "Flash Model",
-      imageUrl:
-          "https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/google-gemini-icon.png",
-    );
 
     final messages = <types.Message>[
       types.TextMessage(
