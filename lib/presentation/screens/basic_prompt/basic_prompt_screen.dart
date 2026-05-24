@@ -1,26 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gemini_chat_app/presentation/providers/chat/is_gemini_writing.dart';
+import 'package:gemini_chat_app/presentation/providers/users/user_provider.dart';
 import 'package:uuid/uuid.dart';
 
-class BasicPromptScreen extends StatelessWidget {
+class BasicPromptScreen extends ConsumerWidget {
   const BasicPromptScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    const user = types.User(
-      id: "user-id-anthonny",
-      firstName: "Anthonny",
-      lastName: "Sacheri",
-      imageUrl: "https://cdn-icons-png.flaticon.com/512/12225/12225881.png",
-    );
-
-    final messages = <types.Message>[
-      types.TextMessage(
-          author: user, id: const Uuid().v4(), text: 'Hola mundo'),
-      types.TextMessage(
-          author: geminiUser, id: const Uuid().v4(), text: 'Que quieres puto'),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final customUser = ref.watch(customUserProvider);
+    final geminiUser = ref.watch(geminiUserProvider);
+    final isGeminiWriting = ref.watch(isGeminiWritingProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -28,19 +21,34 @@ class BasicPromptScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Chat(
-        messages: messages,
+        messages: [
+          types.TextMessage(
+              author: geminiUser,
+              id: const Uuid().v4(),
+              text: 'Que pasa puto?'),
+          types.TextMessage(
+              author: customUser, id: const Uuid().v4(), text: 'Sapo'),
+        ],
         onSendPressed: (types.PartialText partialText) {
-          messages.add(types.TextMessage(
-              author: user, id: const Uuid().v4(), text: partialText.text));
+          // messages.add(types.TextMessage(
+          //     author: customUser,
+          //     id: const Uuid().v4(),
+          //     text: partialText.text));
           print(partialText.text);
         },
-        user: user,
+        user: customUser,
         showUserAvatars: true,
         showUserNames: true,
         theme: const DarkChatTheme(),
-        typingIndicatorOptions: const TypingIndicatorOptions(typingUsers: [
-          // geminiUser TODO
-        ], customTypingWidget: Text("Gemini esta pensando...")),
+        typingIndicatorOptions: TypingIndicatorOptions(
+            typingUsers: isGeminiWriting ? [geminiUser] : [],
+            customTypingWidget: const Center(
+              child: Text("Gemini esta pensando...",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  )),
+            )),
       ),
     );
   }

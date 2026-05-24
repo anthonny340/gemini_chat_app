@@ -15,3 +15,15 @@ types.User geminiUser(Ref ref) {
 
   return geminiUser;
 }
+
+@riverpod
+types.User customUser(Ref ref) {
+  const customUser = types.User(
+    id: "user-id-anthonny",
+    firstName: "Anthonny",
+    lastName: "Sacheri",
+    imageUrl: "https://cdn-icons-png.flaticon.com/512/12225/12225881.png",
+  );
+
+  return customUser;
+}
