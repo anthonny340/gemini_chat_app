@@ -11,44 +11,47 @@ const uuid = Uuid();
 @riverpod
 class BasicChat extends _$BasicChat {
   final gemini = GeminiImpl();
+  late User geminiUser;
+
   @override
   List<Message> build() {
+    geminiUser = ref.read(geminiUserProvider);
     return [];
   }
 
   void addMessage({required PartialText partialText, required User user}) {
     //TODO Evaluar si es una imagen
     _addTextMessage(partialText, user);
-
-    _geminiResponse(partialText.text);
   }
 
   void _addTextMessage(PartialText partialText, User author) {
+    _createMessage(partialText.text, author);
+    _geminiResponse(partialText.text);
+  }
+
+  void _geminiResponse(String prompt) async {
+    _setIsGeminiWritting(true);
+
+    final responseText = await gemini.getResponse(prompt);
+
+    _setIsGeminiWritting(false);
+    _createMessage(responseText, geminiUser);
+  }
+
+  // Helper methods
+  void _setIsGeminiWritting(bool isWritting) {
+    final geminiWriting = ref.read(isGeminiWritingProvider.notifier);
+    isWritting ? geminiWriting.setIsWriting() : geminiWriting.setIsNotWriting();
+  }
+
+  void _createMessage(String text, User author) {
     final message = TextMessage(
       id: uuid.v4(),
       author: author,
-      text: partialText.text,
+      text: text,
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
 
     state = [message, ...state];
-  }
-
-  void _geminiResponse(String prompt) async {
-    final geminiWriting = ref.read(isGeminiWritingProvider.notifier);
-    final geminiUser = ref.read(geminiUserProvider);
-    geminiWriting.setIsWriting();
-
-    final response = await gemini.getResponse(prompt);
-    geminiWriting.setIsNotWriting();
-
-    final geminiMessage = TextMessage(
-      id: uuid.v4(),
-      author: geminiUser,
-      text: response,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-    );
-
-    state = [geminiMessage, ...state];
   }
 }
