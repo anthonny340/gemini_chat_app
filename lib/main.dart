@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_chat_app/config/router/app_router.dart';
 import 'package:gemini_chat_app/config/theme/app_theme.dart';
 
-void main() {
-  runApp(const ProviderScope(child: MainApp()));
+void main() async {
+  await dotenv.load(fileName: ".env");
+  // print(dotenv.env["ENDPOINT_API"]);
+  runApp(
+    const ProviderScope(child: MainApp()),
+  );
 }
 
 class MainApp extends StatelessWidget {
