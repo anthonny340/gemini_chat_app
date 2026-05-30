@@ -33,7 +33,7 @@ class BasicPromptScreen extends ConsumerWidget {
             onSend: (partialText, {images = const []}) {
               final basicChatNotifier = ref.read(basicChatProvider.notifier);
               basicChatNotifier.addMessage(
-                  partialText: partialText, user: customUser);
+                  partialText: partialText, user: customUser, images: images);
             },
           ),
           typingIndicatorOptions: TypingIndicatorOptions(
