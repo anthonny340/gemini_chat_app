@@ -3,6 +3,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_chat_app/presentation/providers/providers.dart';
+import 'package:gemini_chat_app/presentation/widgets/chat/custom_bottom_input.dart';
 
 class BasicPromptScreen extends ConsumerWidget {
   const BasicPromptScreen({super.key});
@@ -23,15 +24,18 @@ class BasicPromptScreen extends ConsumerWidget {
         ),
         body: Chat(
           messages: basicChat,
-          onSendPressed: (types.PartialText partialText) {
-            final basicChatNotifier = ref.read(basicChatProvider.notifier);
-            basicChatNotifier.addMessage(
-                partialText: partialText, user: customUser);
-          },
+          onSendPressed: (types.PartialText partialText) {},
           user: customUser,
           showUserAvatars: true,
           showUserNames: true,
           theme: const DarkChatTheme(),
+          customBottomWidget: CustomBottomInput(
+            onSend: (partialText, {images = const []}) {
+              final basicChatNotifier = ref.read(basicChatProvider.notifier);
+              basicChatNotifier.addMessage(
+                  partialText: partialText, user: customUser);
+            },
+          ),
           typingIndicatorOptions: TypingIndicatorOptions(
             typingUsers: isGeminiWriting ? [geminiUser] : [],
             customTypingWidget: const Center(
