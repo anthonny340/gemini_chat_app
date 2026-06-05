@@ -11,6 +11,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/basic-prompt',
       builder: (context, state) => const BasicPromptScreen(),
+    ),
+    GoRoute(
+      path: '/history-chat',
+      builder: (context, state) => const ChatContextScreen(),
     )
   ],
 );
