@@ -18,66 +18,8 @@ class GeminiImpl {
     String prompt, {
     List<XFile> files = const [],
   }) async* {
-    //! Multipart
-    final formData = FormData();
-    formData.fields.add(MapEntry('prompt', prompt));
-
-    if (files.isNotEmpty) {
-      for (final file in files) {
-        // print(file.name);
-        formData.files.add(MapEntry(
-          'images',
-          await MultipartFile.fromFile(file.path, filename: file.name),
-        ));
-      }
-    }
-    final response = await _http.post(
-      '/basic-prompt-stream-images',
-      data: formData,
-      options: Options(responseType: ResponseType.stream),
-    );
-
-    final stream = response.data.stream as Stream<List<int>>;
-    String buffer = '';
-
-    await for (final bytes in stream) {
-      buffer += utf8.decode(bytes, allowMalformed: true);
-
-      final events = buffer
-          .split('\n\n'); // Cada chunk Esta separado asi, desde el backend
-
-      buffer = events.removeLast();
-
-      for (final event in events) {
-        if (!event.startsWith('data:')) continue;
-
-        final jsonString = event.replaceFirst('data:', '').trim();
-
-        final json = jsonDecode(
-            jsonString); // Para convertir el texto JSON en un objeto Dart
-
-        final chunk = json['chunk'];
-        final done = json['done'] == true;
-        final success = json['success'] == true;
-        final error = json['error'];
-
-        if (!success) {
-          print('''
-              ----Error en un chunk----
-              chunk: $chunk,
-              error: $error
-                ''');
-        }
-
-        if (chunk != null) {
-          yield chunk;
-        }
-
-        if (done) {
-          print('Stream finalizado');
-        }
-      }
-    }
+    yield* _getStreamResponse(
+        endponint: '/basic-prompt-stream-images', prompt: prompt, files: files);
   }
 
   Stream<String> getChatStream(
@@ -85,26 +27,47 @@ class GeminiImpl {
     String chatId, {
     List<XFile> files = const [],
   }) async* {
+    final Map<String, dynamic> formFields = {'chatId': chatId};
+
+    yield* _getStreamResponse(
+      endponint: '/chat-stream',
+      prompt: prompt,
+      files: files,
+      formFields: formFields,
+    );
+  }
+
+  Stream<String> _getStreamResponse({
+    required String endponint,
+    required String prompt,
+    List<XFile> files = const [],
+    Map<String, dynamic> formFields = const {},
+  }) async* {
     //! Multipart
     final formData = FormData();
-    formData.fields.add(MapEntry('chatId', chatId));
-    formData.fields.add(MapEntry('prompt', prompt));
+    formData.fields.add(MapEntry("prompt", prompt));
+    for (final entry in formFields.entries) {
+      formData.fields.add(MapEntry(entry.key, entry.value));
+    }
 
+    //! Archivos a subir
     if (files.isNotEmpty) {
       for (final file in files) {
-        // print(file.name);
         formData.files.add(MapEntry(
           'images',
           await MultipartFile.fromFile(file.path, filename: file.name),
         ));
       }
     }
+
+    //! Peticion POST
     final response = await _http.post(
-      '/chat-stream',
+      endponint,
       data: formData,
       options: Options(responseType: ResponseType.stream),
     );
 
+    //! Le damos una firma a la respuesta stream
     final stream = response.data.stream as Stream<List<int>>;
     String buffer = '';
 
@@ -120,7 +83,6 @@ class GeminiImpl {
         if (!event.startsWith('data:')) continue;
 
         final jsonString = event.replaceFirst('data:', '').trim();
-
         final json = jsonDecode(
             jsonString); // Para convertir el texto JSON en un objeto Dart
 
