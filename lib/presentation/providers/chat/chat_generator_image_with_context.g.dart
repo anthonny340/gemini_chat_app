@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'chat_with_context.dart';
+part of 'chat_generator_image_with_context.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,28 +9,29 @@ part of 'chat_with_context.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(ChatWithContext)
-const chatWithContextProvider = ChatWithContextProvider._();
+@ProviderFor(ChatGeneratorImageWithContext)
+const chatGeneratorImageWithContextProvider =
+    ChatGeneratorImageWithContextProvider._();
 
-final class ChatWithContextProvider
-    extends $NotifierProvider<ChatWithContext, List<Message>> {
-  const ChatWithContextProvider._()
+final class ChatGeneratorImageWithContextProvider
+    extends $NotifierProvider<ChatGeneratorImageWithContext, List<Message>> {
+  const ChatGeneratorImageWithContextProvider._()
       : super(
           from: null,
           argument: null,
           retry: null,
-          name: r'chatWithContextProvider',
+          name: r'chatGeneratorImageWithContextProvider',
           isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
 
   @override
-  String debugGetCreateSourceHash() => _$chatWithContextHash();
+  String debugGetCreateSourceHash() => _$chatGeneratorImageWithContextHash();
 
   @$internal
   @override
-  ChatWithContext create() => ChatWithContext();
+  ChatGeneratorImageWithContext create() => ChatGeneratorImageWithContext();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(List<Message> value) {
@@ -41,9 +42,11 @@ final class ChatWithContextProvider
   }
 }
 
-String _$chatWithContextHash() => r'7ba9f9052e5646f9bf44a29229822f546df54a86';
+String _$chatGeneratorImageWithContextHash() =>
+    r'549607b3408336d87b076c14008eaf4eaabb8afb';
 
-abstract class _$ChatWithContext extends $Notifier<List<Message>> {
+abstract class _$ChatGeneratorImageWithContext
+    extends $Notifier<List<Message>> {
   List<Message> build();
   @$mustCallSuper
   @override

@@ -43,6 +43,19 @@ class HomeScreen extends StatelessWidget {
             ),
             ListTile(
               leading: const CircleAvatar(
+                backgroundColor: Colors.blueAccent,
+                child: Icon(
+                  Icons.watch_later_outlined,
+                  color: Colors.white,
+                ),
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios_rounded),
+              title: const Text("Chat de generacion de Imagenes con Gemini"),
+              subtitle: const Text("Gemini recuerda el contexto"),
+              onTap: () => context.push('/history-chat-image-generator'),
+            ),
+            ListTile(
+              leading: const CircleAvatar(
                 backgroundColor: Colors.orange,
                 child: Icon(
                   Icons.image_outlined,

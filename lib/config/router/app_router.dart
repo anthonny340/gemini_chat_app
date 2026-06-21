@@ -17,6 +17,10 @@ final appRouter = GoRouter(
       builder: (context, state) => const ChatContextScreen(),
     ),
     GoRoute(
+      path: '/history-chat-image-generator',
+      builder: (context, state) => const ChatGenerateImageContextScreen(),
+    ),
+    GoRoute(
       path: '/image-playground',
       builder: (context, state) => const ImagePlaygroundScreen(),
     )
