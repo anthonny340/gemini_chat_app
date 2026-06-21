@@ -109,4 +109,121 @@ class GeminiImpl {
       }
     }
   }
+
+  Future<String?> generateImage(String prompt,
+      {List<XFile> images = const []}) async {
+    final formData = FormData();
+
+    formData.fields.add(MapEntry('prompt', prompt));
+    for (final image in images) {
+      formData.files.add(MapEntry('images',
+          await MultipartFile.fromFile(image.path, filename: image.name)));
+    }
+
+    try {
+      final response = await _http.post('/generate-image', data: formData);
+
+      return response.data['chunk'];
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  //! TODO Implementar este metodo
+  Stream<Map<String, String>> getGenerateImageChatStream(
+    String prompt,
+    String chatId, {
+    List<XFile> files = const [],
+  }) async* {
+    final Map<String, dynamic> formFields = {'chatId': chatId};
+
+    yield* _getStreamResponseWithImage(
+      endponint: '/chat-generate-image',
+      prompt: prompt,
+      files: files,
+      formFields: formFields,
+    );
+  }
+
+  Stream<Map<String, String>> _getStreamResponseWithImage({
+    required String endponint,
+    required String prompt,
+    List<XFile> files = const [],
+    Map<String, dynamic> formFields = const {},
+  }) async* {
+    //! Multipart
+    final formData = FormData();
+    formData.fields.add(MapEntry("prompt", prompt));
+    for (final entry in formFields.entries) {
+      formData.fields.add(MapEntry(entry.key, entry.value));
+    }
+
+    //! Archivos a subir
+    if (files.isNotEmpty) {
+      for (final file in files) {
+        formData.files.add(MapEntry(
+          'images',
+          await MultipartFile.fromFile(file.path, filename: file.name),
+        ));
+      }
+    }
+
+    //! Peticion POST
+    final response = await _http.post(
+      endponint,
+      data: formData,
+      options: Options(responseType: ResponseType.stream),
+    );
+
+    //! Le damos una firma a la respuesta stream
+    final stream = response.data.stream as Stream<List<int>>;
+    String buffer = '';
+
+    await for (final bytes in stream) {
+      buffer += utf8.decode(bytes, allowMalformed: true);
+
+      final events = buffer
+          .split('\n\n'); // Cada chunk Esta separado asi, desde el backend
+
+      buffer = events.removeLast();
+
+      for (final event in events) {
+        if (!event.startsWith('data:')) continue;
+
+        final jsonString = event.replaceFirst('data:', '').trim();
+        final json = jsonDecode(
+            jsonString); // Para convertir el texto JSON en un objeto Dart
+
+        final chunk = json['chunk'];
+        final type = json['type'];
+        final done = json['done'] == true;
+
+        switch (type) {
+          case 'text':
+            if (chunk != null) {
+              yield {'text': chunk};
+            }
+            break;
+          case 'image':
+            if (chunk != null) {
+              yield {'image': chunk};
+            }
+            break;
+          case 'error':
+            print('''
+              ----Error en un chunk----
+              type: $type
+              chunk: $chunk
+                ''');
+            break;
+          case 'end':
+            if (done) {
+              print('Stream finalizado');
+            }
+            break;
+        }
+      }
+    }
+  }
 }
