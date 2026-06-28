@@ -46,7 +46,7 @@ class ChatGeneratorImageWithContext extends _$ChatGeneratorImageWithContext {
     List<XFile> images,
   ) async {
     for (XFile image in images) {
-      await _createImageMessage(image, author);
+      await _createImageXFileMessage(image, author);
     }
 
     _createMessage(partialText.text, author);
@@ -60,28 +60,53 @@ class ChatGeneratorImageWithContext extends _$ChatGeneratorImageWithContext {
     bool geminiMessageCreated = false;
 
     gemini
-        .getChatStream(
+        .getGenerateImageChatStream(
       prompt,
       chatId,
       files: images,
     )
         .listen(
-      (responseChunk) {
-        if (responseChunk.isEmpty) return;
+      (responseChunk) async {
+        // if (responseChunk.isEmpty) return;
+
+        final type = responseChunk['type'] as String?;
+        final chunk = responseChunk['chunk'] as String?;
+        final done = responseChunk['done'] == true;
+
+        if (done || type == 'end') {
+          _setIsGeminiWritting(false);
+          return;
+        }
 
         final updatedMessages = [...state];
 
-        if (!geminiMessageCreated) {
-          _createMessage(responseChunk, geminiUser);
-          geminiMessageCreated = true;
-        } else {
-          final currentMessage = updatedMessages.first as TextMessage;
-          final updatedMessage = currentMessage.copyWith(
-            text: currentMessage.text + responseChunk,
-          );
+        switch (type) {
+          case 'text':
+            if (!geminiMessageCreated) {
+              _createMessage(chunk!,
+                  geminiUser); //TODO: Controlar posible error de chunk null
+              geminiMessageCreated = true;
+            } else {
+              final currentMessage = updatedMessages.first as TextMessage;
+              final updatedMessage = currentMessage.copyWith(
+                text: currentMessage.text + chunk!,
+              );
 
-          updatedMessages[0] = updatedMessage;
-          state = updatedMessages;
+              updatedMessages[0] = updatedMessage;
+              state = updatedMessages;
+            }
+            break;
+          case 'image':
+            print(chunk);
+            await _createImageUrlMessage(chunk!,
+                geminiUser); //TODO: Controlar posible error de chunk null
+
+            break;
+          case 'error':
+            _createMessage(chunk!, geminiUser);
+            break;
+          // case 'end':
+          //   break;
         }
       },
       onDone: () {
@@ -119,13 +144,29 @@ class ChatGeneratorImageWithContext extends _$ChatGeneratorImageWithContext {
     state = [message, ...state];
   }
 
-  Future<void> _createImageMessage(XFile image, User author) async {
+  Future<void> _createImageXFileMessage(XFile image, User author) async {
     final message = ImageMessage(
       id: uuid.v4(),
       author: author,
       uri: image.path,
       name: image.name,
       size: await image.length(),
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+    );
+
+    state = [message, ...state];
+  }
+
+  Future<void> _createImageUrlMessage(String image, User author) async {
+    image = image.replaceFirst('http://127.0.0.1:8000',
+        'https://overrude-socioeconomic-herlinda.ngrok-free.dev');
+
+    final message = ImageMessage(
+      id: uuid.v4(),
+      author: author,
+      uri: image,
+      name: image.split('/').last,
+      size: 0,
       createdAt: DateTime.now().millisecondsSinceEpoch,
     );
 

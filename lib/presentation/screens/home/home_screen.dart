@@ -43,7 +43,7 @@ class HomeScreen extends StatelessWidget {
             ),
             ListTile(
               leading: const CircleAvatar(
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: Colors.pink,
                 child: Icon(
                   Icons.watch_later_outlined,
                   color: Colors.white,

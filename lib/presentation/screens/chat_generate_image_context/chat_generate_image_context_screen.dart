@@ -26,7 +26,9 @@ class ChatGenerateImageContextScreen extends ConsumerWidget {
           actions: [
             IconButton(
                 onPressed: () {
-                  ref.read(chatWithContextProvider.notifier).newChat();
+                  ref
+                      .read(chatGeneratorImageWithContextProvider.notifier)
+                      .newChat();
                 },
                 icon: const Icon(Icons.clear_outlined))
           ],
@@ -40,9 +42,9 @@ class ChatGenerateImageContextScreen extends ConsumerWidget {
           theme: const DarkChatTheme(),
           customBottomWidget: CustomBottomInput(
             onSend: (partialText, {images = const []}) {
-              final chatWithContextNotifier =
-                  ref.read(chatWithContextProvider.notifier);
-              chatWithContextNotifier.addMessage(
+              final chatWithImageContextNotifier =
+                  ref.read(chatGeneratorImageWithContextProvider.notifier);
+              chatWithImageContextNotifier.addMessage(
                   partialText: partialText, user: customUser, images: images);
             },
           ),

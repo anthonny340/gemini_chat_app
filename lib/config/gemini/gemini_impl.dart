@@ -131,7 +131,7 @@ class GeminiImpl {
   }
 
   //! TODO Implementar este metodo
-  Stream<Map<String, String>> getGenerateImageChatStream(
+  Stream<Map<String, dynamic>> getGenerateImageChatStream(
     String prompt,
     String chatId, {
     List<XFile> files = const [],
@@ -146,7 +146,7 @@ class GeminiImpl {
     );
   }
 
-  Stream<Map<String, String>> _getStreamResponseWithImage({
+  Stream<Map<String, dynamic>> _getStreamResponseWithImage({
     required String endponint,
     required String prompt,
     List<XFile> files = const [],
@@ -202,23 +202,36 @@ class GeminiImpl {
         switch (type) {
           case 'text':
             if (chunk != null) {
-              yield {'text': chunk};
+              yield {
+                'type': 'text',
+                'chunk': chunk,
+                'done': false,
+              };
             }
             break;
           case 'image':
             if (chunk != null) {
-              yield {'image': chunk};
+              yield {
+                'type': 'image',
+                'chunk': chunk,
+                'done': false,
+              };
             }
             break;
           case 'error':
-            print('''
-              ----Error en un chunk----
-              type: $type
-              chunk: $chunk
-                ''');
+            yield {
+              'type': 'error',
+              'chunk': chunk ?? 'Error desconocido',
+              'done': true,
+            };
             break;
           case 'end':
             if (done) {
+              yield {
+                'type': 'end',
+                'chunk': chunk ?? '',
+                'done': true,
+              };
               print('Stream finalizado');
             }
             break;
