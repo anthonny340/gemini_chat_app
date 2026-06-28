@@ -41,7 +41,7 @@ final class ChatWithContextProvider
   }
 }
 
-String _$chatWithContextHash() => r'9374c881a7169a6d1a675939b6c580b419d23a05';
+String _$chatWithContextHash() => r'7ba9f9052e5646f9bf44a29229822f546df54a86';
 
 abstract class _$ChatWithContext extends $Notifier<List<Message>> {
   List<Message> build();
